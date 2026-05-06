@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Bio & Bien - Jeu Fidélité</title>
+
+<style>
+body{
+  margin:0;
+  font-family:Arial;
+  background:#ffc107;
+  text-align:center;
+}
+
+.screen{display:none;padding:20px}
+.active{display:block}
+
+.card{
+  background:white;
+  border-radius:20px;
+  padding:20px;
+  margin:20px auto;
+  max-width:360px;
+  box-shadow:0 5px 15px rgba(0,0,0,0.2);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+}
+
+button{
+  padding:12px 20px;
+  border:none;
+  border-radius:10px;
+  margin:5px;
+  font-weight:bold;
+}
+
+.primary{background:#2e7d32;color:white}
+.secondary{background:#ddd}
+
+.logo{max-width:160px}
+
+/* ===== ROUE ===== */
+.wheel-container{
+  position:relative;
+  width:100%;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  margin:auto;
+}
+
+.arrow{
+  position:absolute;
+  top:-15px;
+  left:50%;
+  transform:translateX(-50%);
+  width:8px;
+  height:50px;
+  background:#ffcc00;
+  border-radius:5px;
+  z-index:20;
+}
+
+.wheel{
+  position:relative;
+  width:85vw;
+  height:85vw;
+  max-width:300px;
+  max-height:300px;
+  border-radius:50%;
+  border:10px solid white;
+
+  background: conic-gradient(
+    #2e7d32 0 120deg,
+    #66bb6a 120deg 240deg,
+    #ffc107 240deg 360deg
+  );
+
+  box-shadow:
+    inset 0 0 20px rgba(0,0,0,0.3),
+    0 10px 20px rgba(0,0,0,0.4);
+
+  transition: transform 12s cubic-bezier(0.05,0.8,0.2,1);
+}
+
+.wheel::after{
+  content:"";
+  position:absolute;
+  width:50px;
+  height:50px;
+  background:#eee;
+  border-radius:50%;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+}
+
+/* SEGMENTS */
+.segment{
+  position:absolute;
+  left:50%;
+  top:50%;
+  transform-origin:0 0;
+  width:110px;
+  text-align:center;
+  font-size:14px;
+  font-weight:bold;
+  color:white;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+}
+
+.segment img{
+  width:22px;
+  margin-top:5px;
+}
+
+.s1{
+  transform: rotate(60deg) translate(-50%, -190%);
+}
+
+.s2{
+  transform: rotate(180deg) translate(-50%, -190%);
+}
+
+.s3{
+  transform: rotate(300deg) translate(-50%, -190%);
+  font-size:12px;
+}
+
+/* ===== CHECK ANIMATION ===== */
+.checkmark-circle{
+  width:80px;
+  height:80px;
+  border-radius:50%;
+  background:#2e7d32;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  margin:20px auto;
+  animation:popCheck 0.4s ease;
+}
+
+.checkmark{
+  width:25px;
+  height:50px;
+  border-right:6px solid white;
+  border-bottom:6px solid white;
+  transform:rotate(45deg) scale(0);
+  animation:drawCheck 0.4s 0.2s forwards ease;
+}
+
+@keyframes popCheck{
+  0%{transform:scale(0.5);opacity:0}
+  100%{transform:scale(1);opacity:1}
+}
+
+@keyframes drawCheck{
+  0%{transform:rotate(45deg) scale(0)}
+  100%{transform:rotate(45deg) scale(1)}
+}
+
+/* ===== CONFETTIS ===== */
+.confetti{
+  position:fixed;
+  top:-20px;
+  width:10px;
+  height:10px;
+  border-radius:50%;
+  animation:fall linear forwards;
+}
+
+@keyframes fall{
+  0%{transform:translateY(0) rotate(0deg);opacity:1;}
+  100%{transform:translateY(110vh) rotate(720deg);opacity:0;}
+}
+
+/* ===== LOADING ===== */
+.loading-card{
+  padding:15px;
+  max-width:260px;
+  border-radius:14px;
+}
+
+.loading-text{
+  font-size:16px;
+  font-weight:600;
+  color:#2e7d32;
+  margin:0;
+}
+
+/* ===== BOUTONS LONGS ===== */
+.long-btn{
+  width:80%;
+  max-width:260px;
+  padding:14px 0;
+  font-size:16px;
+  border-radius:12px;
+}
+
+/* ===== HOME IMAGE ===== */
+.home-image-container{
+  position:relative;
+  width:100%;
+  max-width:360px;
+  margin:auto;
+  aspect-ratio:9/16;
+}
+
+.home-image{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  border-radius:20px;
+}
+
+/* ===== BOUTON RESPONSIVE ===== */
+.cta-overlay{
+  position:absolute;
+  top:86%;
+  left:50%;
+  transform:translate(-50%, -50%);
+  width:75%;
+  max-width:260px;
+  padding:14px;
+  font-size:16px;
+  font-weight:bold;
+  background:#2e7d32;
+  color:white;
+  border:none;
+  border-radius:14px;
+  box-shadow:0 6px 15px rgba(0,0,0,0.3);
+  animation:pulse 1.5s infinite;
+}
+
+@keyframes pulse{
+  0%{transform:translate(-50%, -50%) scale(1)}
+  50%{transform:translate(-50%, -50%) scale(1.05)}
+  100%{transform:translate(-50%, -50%) scale(1)}
+}
+
+.cta-overlay:active{
+  transform:translate(-50%, -50%) scale(0.95);
+}
+
+.result-message{
+  margin-top:10px;
+  font-size:14px;
+  font-weight:bold;
+  color:#2e7d32;
+}
+
+.loading-image{
+  width:85%;
+  max-width:320px;
+  margin-top:20px;
+  margin-bottom:10px;
+}
+
+.loading-card{
+  padding:10px 18px;
+  max-width:220px;
+  border-radius:14px;
+}
+
+.loading-text{
+  font-size:14px;
+  font-weight:600;
+  color:#2e7d32;
+  margin:0;
+}
+</style>
+</head>
+
+<body>
+
+<div id="home" class="screen active">
+  <div class="home-image-container">
+
+    <img src="home-bg.png" class="home-image">
+
+    <button class="cta-overlay" onclick="start()">
+      🎡 LANCER LE JEU
+    </button>
+
+  </div>
+</div>
+
+<div id="loading" class="screen">
+
+<img src="chargement_jeu.png" class="loading-image">
+
+<div class="card loading-card">
+  <h2 class="loading-text">Préparation du jeu...</h2>
+</div>
+
+</div>
+
+<div id="satisfaction" class="screen">
+<div class="card">
+<h3>Avant tout nous avons besoin de votre avis ! 💚</h3>
+<img src="avis.png" class="logo">
+<p>Êtes-vous satisfait de votre visite ?</p>
+<button class="primary long-btn" onclick="goGoogle()">Oui 😊</button>
+<button class="secondary long-btn" onclick="goSpin()">Non 😕</button>
+</div>
+</div>
+
+<div id="avisGoogle" class="screen">
+<div class="card">
+<h2>Dites le nous sur Google !</h2>
+<img src="google.png" class="logo">
+
+<p><b>1.</b> Vous allez être redirigé sur notre page Google pour partager votre avis !</p>
+
+<p><b>2.</b> 👉 Revenez avec le bouton retour de votre téléphone pour jouer 🎁</p>
+
+<p><b>3.</b> <u>Le jeu va démarrer automatiquement !</u></p>
+
+<button class="primary" onclick="ouvrirGoogle()">Je partage mon avis ⭐</button>
+</div>
+</div>
+
+<div id="merciAvis" class="screen">
+<div class="card">
+
+<div class="checkmark-circle">
+  <div class="checkmark"></div>
+</div>
+
+<h2>Merci pour votre avis 💚</h2>
+
+<img src="logo.png" class="logo">
+
+<p>Votre participation a bien été prise en compte</p>
+
+<button class="primary" onclick="goSpin()">
+Découvrir mon cadeau 🎡
+</button>
+
+</div>
+</div>
+
+<div id="wheelScreen" class="screen">
+<div class="card">
+
+<h3>Tentez votre chance 🎡</h3>
+
+<div class="wheel-container">
+
+<div class="arrow"></div>
+
+<div id="wheel" class="wheel">
+
+<div class="segment s1">
+💚
+<br>
+Remsie -5%
+</div>
+
+<div class="segment s2">
+🔥
+<br>
+Remise -10%
+</div>
+
+<div class="segment s3">
+🎁
+<br>
+1 Consultation offerte
+<br>
+Valeur 60€
+</div>
+</div>
+
+</div>
+
+</div>
+</div>
+
+<div id="result" class="screen">
+<div class="card">
+
+<h2 id="gain"></h2>
+
+<p class="result-message">
+👉 Présentez cet écran à un vendeur pour récupérer votre cadeau 🎁
+</p>
+
+<img src="logo.png" class="logo">
+
+</div>
+</div>
+
+<script>
+
+const rewards=[
+"💚 Remise immédiate de -5%",
+"🔥 Remise immédiate de -10%",
+"🎁 Consultation OFFERTE d'une valeur de 60€"
+];
+
+let spinning=false;
+
+function show(id){
+ document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+ document.getElementById(id).classList.add("active");
+}
+
+function start(){
+
+ if(localStorage.getItem("jeuDejaJoue")==="true"){
+
+   alert("🎁 Vous avez déjà tenté votre chance !");
+
+   return;
+ }
+
+ show("loading");
+
+ setTimeout(()=>show("satisfaction"),1500);
+}
+
+function goGoogle(){
+ show("avisGoogle");
+}
+
+function ouvrirGoogle(){
+
+ sessionStorage.setItem("retourAvis","true");
+
+ window.location.href="https://www.google.com/search?sca_esv=f20504b6fbd26699&sxsrf=ANbL-n5C8PL3LD1O78O9_2MRBUm83VmegQ:1777727148111&si=AL3DRZEsmMGCryMMFSHJ3StBhOdZ2-6yYkXd_doETEE1OR-qOTLBdxwTSr2nksFGhVnR9_3ZdqcUco7sgkQ-8K0Nb2RlODN2Sp6j7tU5PyAtKnTh7QrTdhwxAEAjBOSO8wgoLXBH6Hyw&q=Bio+%26+Bien+Avis&sa=X&ved=2ahUKEwiOwq7Z1ZqUAxUrgmoFHVlZLgAQ0bkNegQIPhAH&biw=1536&bih=799&dpr=1.25";
+}
+
+window.addEventListener("pageshow", function(){
+
+ if(sessionStorage.getItem("retourAvis")==="true"){
+   sessionStorage.removeItem("retourAvis");
+   show("merciAvis");
+ }
+
+});
+
+function goSpin(){
+ show("wheelScreen");
+ setTimeout(spin,500);
+}
+
+function spin(){
+
+ if(spinning) return;
+
+ spinning=true;
+
+ let wheel=document.getElementById("wheel");
+
+let random=Math.random();
+
+let index;
+
+if(random < 0.65){
+  index = 0; // -5%
+}
+else if(random < 0.90){
+  index = 1; // -10%
+}
+else{
+  index = 2; // Consultation offerte
+}
+
+ let sector=360/3;
+
+ let stopAngle=(index*sector)+(sector/2);
+
+ let final=(360*8)+(360-stopAngle);
+
+ wheel.style.transform="rotate("+final+"deg)";
+
+ setTimeout(()=>{
+
+   document.getElementById("gain").innerHTML=
+   "🎉 VOUS AVEZ GAGNÉ :<br><br>"+rewards[index];
+
+   localStorage.setItem("jeuDejaJoue","true");
+   show("result");
+
+   launchConfetti();
+
+ },12000);
+}
+
+function launchConfetti(){
+
+ const colors=["#ff0","#ff4081","#00e5ff","#69f0ae","#ff9100","#e040fb"];
+
+ for(let i=0;i<100;i++){
+
+   let c=document.createElement("div");
+
+   c.className="confetti";
+
+   c.style.left=Math.random()*window.innerWidth+"px";
+
+   c.style.background=colors[Math.floor(Math.random()*colors.length)];
+
+   c.style.width=c.style.height=(Math.random()*6+6)+"px";
+
+   c.style.animationDuration=(Math.random()*2+2)+"s";
+
+   document.body.appendChild(c);
+
+   setTimeout(()=>c.remove(),4000);
+ }
+}
+
+</script>
+
+</body>
+</html>
